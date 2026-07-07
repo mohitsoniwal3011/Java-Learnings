@@ -1,0 +1,29 @@
+
+// initialization
+Thread t = new Thread(() -> { something })
+
+
+// start a new thread and run
+t.start()
+
+// run method continues execution in main , its like similar to normal method call withoud
+// thread
+t.run()
+
+// join() - waits for another thread to complete execution
+t.join()
+// now main thread waits until t thread finishes
+
+// interrupt() - interrupts the thread midway (does not when used with synchronized block)
+t.interrupt() -> interrupts the thread
+
+
+// setDemon(true) - sets the thread to a demon thread (demon thread is a thread that runs in background)
+t.setDemon(false)
+
+// isAlive() - checks if a thread is alive (jinda h yaa mar gaya )
+
+// getName() -> gives name of thread
+// currentThread() -> static method returns current thread
+// yield() -> thread is potentially available to be released
+
