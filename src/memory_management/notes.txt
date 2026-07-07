@@ -1,0 +1,332 @@
+=========================
+JAVA MEMORY MANAGEMENT
+=========================
+
+Java Memory is broadly divided into 4 runtime memory areas.
+
+                JVM Memory
+                     |
+     ---------------------------------
+     |               |              |
+   Heap         Method Area     Thread Memory
+                                    |
+                             -------------------
+                             |                 |
+                           Stack      Program Counter (PC)
+
+====================================
+Shared vs Thread Private Memory
+====================================
+
+Shared by all threads:
+- Heap
+- Method Area
+
+Thread Private (Each thread has its own):
+- Stack
+- Program Counter (PC Register)
+
+Note:
+- Garbage Collector (GC) primarily works on the Heap.
+- Method Area stores class metadata and may also be cleaned if class unloading happens.
+
+====================================================
+1. Method Area (Class Metadata Area)
+====================================================
+
+Stores information about classes loaded into JVM.
+
+Example:
+
+class Student {
+    static int count;
+
+    void m1() {}
+
+    void m2(int a) {}
+}
+
+Method Area stores:
+- Class name
+- Field definitions
+- Method definitions
+- Constructor definitions
+- Static variables
+- Runtime Constant Pool
+
+Think of it as the blueprint of the class.
+
+Whenever we write:
+
+Student s = new Student();
+
+JVM already knows:
+- Object size
+- Fields
+- Methods
+- Constructors
+
+because this information is present in the Method Area.
+
+====================================================
+2. Stack (Execution Memory)
+====================================================
+
+Each thread gets its own Stack.
+
+Properties:
+- LIFO (Last In First Out)
+- Store Stack Frames
+
+Whenever a method is called,
+a new Stack Frame is created.
+
+A Stack Frame contains:
+- Local variables
+- Primitive values
+- Object references
+- Method parameters
+- Return information
+
+Example:
+
+void m1() {
+    int x = 5;
+    Student s = new Student();
+}
+
+Stack Frame:
+
+m1()
+
+x = 5
+
+s = 0x12345
+
+Important:
+
+The actual Student object is NOT stored in the Stack.
+
+Only its reference (memory address) is stored.
+
+====================================================
+3. Program Counter (PC Register)
+====================================================
+
+Each thread has its own Program Counter.
+
+It stores the address of the next bytecode instruction to execute.
+
+Example:
+
+int x = 5;
+Student s = new Student();
+s.name = "Aditya";
+
+Execution:
+
+PC -> Execute:
+int x = 5;
+
+PC -> Execute:
+Student s = new Student();
+
+PC -> Execute:
+s.name = "Aditya";
+
+The PC keeps moving as the program executes.
+
+====================================================
+4. Heap
+====================================================
+
+Heap stores all objects created during runtime.
+
+Example:
+
+Student s = new Student();
+
+Heap:
+
+0x12345
+
+Student
+-------
+name
+age
+
+The variable "s" is NOT stored in Heap.
+
+Only the Student object is stored in Heap.
+
+The reference "s" is stored inside the Stack.
+
+====================================================
+Complete Example
+====================================================
+
+class Student {
+    String name;
+    int age;
+}
+
+public class Demo {
+
+    public static void main(String[] args) {
+
+        int x = 5;
+
+        Student s1 = new Student();
+
+        s1.name = "Aditya";
+    }
+}
+
+====================================================
+Execution Flow
+====================================================
+
+Step 1
+
+Compile:
+
+javac Demo.java
+
+Creates:
+
+Demo.class
+Student.class
+
+----------------------------------------------------
+
+Step 2
+
+Run:
+
+java Demo
+
+JVM starts.
+
+It creates:
+- Method Area
+- Heap
+- Main Thread
+
+Main Thread gets:
+- Stack
+- Program Counter
+
+----------------------------------------------------
+
+Step 3
+
+main() starts.
+
+Stack:
+
+main()
+
+x = ?
+s1 = null
+
+----------------------------------------------------
+
+Step 4
+
+Execute:
+
+int x = 5;
+
+Stack:
+
+main()
+
+x = 5
+
+s1 = null
+
+PC moves to the next instruction.
+
+----------------------------------------------------
+
+Step 5
+
+Execute:
+
+Student s1 = new Student();
+
+A Student object is created in Heap.
+
+Heap:
+
+0x12345
+
+Student
+
+name = null
+age = 0
+
+Stack:
+
+main()
+
+x = 5
+
+s1 -----> 0x12345
+
+Only the reference is stored in Stack.
+
+----------------------------------------------------
+
+Step 6
+
+Execute:
+
+s1.name = "Aditya";
+
+The String "Aditya" exists in the String Pool (which is part of Heap).
+
+Heap:
+
+Student @0x12345
+
+name -----> "Aditya"
+age = 0
+
+----------------------------------------------------
+
+Step 7
+
+main() finishes.
+
+The main Stack Frame is removed.
+
+Stack:
+
+(empty)
+
+Now no reference points to the Student object.
+
+The Student object becomes eligible for Garbage Collection.
+
+Whenever the Garbage Collector runs,
+it can reclaim the Heap memory occupied by that object.
+
+====================================================
+Interview Summary
+====================================================
+
+1. Heap stores runtime objects.
+2. Method Area stores class metadata and static members.
+3. Stack stores method calls, local variables, and object references.
+4. Program Counter stores the next bytecode instruction to execute.
+5. Heap and Method Area are shared among threads.
+6. Stack and Program Counter are private to each thread.
+7. Garbage Collection primarily works on Heap memory.
+8. Objects live in Heap, while references to those objects live in Stack.
+
+======
+
+1. Arrays are also stored in heap memory
+2. String -> new String() -> goes to heap
+          -> "Aditya" -> goes to string pool of heap

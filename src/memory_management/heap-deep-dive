@@ -1,0 +1,431 @@
+====================================================
+WHAT HAPPENS INTERNALLY WHEN WE RUN A JAVA PROGRAM
+====================================================
+
+Example:
+
+class Student {
+
+    String name;
+    int age;
+
+    static String college = "IIT G";
+
+    public Student(String name, int age){
+        this.name = name;
+        this.age = age;
+    }
+
+    public void markAttendance(){
+        System.out.println(name + " is present");
+    }
+
+    public static void changeCollege(String newCollege){
+        college = newCollege;
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args){
+
+        Student s1 = new Student("Aditya", 28);
+
+        s1.markAttendance();
+
+        Student.changeCollege("IIT Bombay");
+    }
+}
+
+====================================================
+STEP 1 : JVM STARTS
+====================================================
+
+Command:
+
+java Main
+
+The Operating System starts the JVM process.
+
+JVM creates the runtime memory areas:
+
+1. Heap
+2. Method Area
+3. Main Thread
+4. Main Thread Stack
+5. Program Counter (PC Register)
+
+Nothing from our program is executing yet.
+
+====================================================
+STEP 2 : CLASS LOADING
+====================================================
+
+JVM asks the Class Loader to load Main.class.
+
+Since Main uses Student,
+
+Student.class is also loaded.
+
+The Class Loader stores metadata inside the Method Area.
+
+Method Area now contains:
+
+Class : Main
+
+- Parent = Object
+- main(String[])
+- Bytecode
+
+Class : Student
+
+Fields
+
+- name
+- age
+- college (static)
+
+Methods
+
+- Student()
+- markAttendance()
+- changeCollege()
+
+Notice:
+
+Only the class definitions are loaded.
+
+NO objects are created yet.
+
+====================================================
+STEP 3 : STATIC VARIABLES INITIALIZED
+====================================================
+
+Static variables belong to the class.
+
+Example:
+
+static String college = "IIT G";
+
+During class initialization,
+
+college is initialized.
+
+Method Area
+
+Student
+
+college -----------> "IIT G"
+
+The String literal "IIT G" is stored in the String Pool
+(which is part of Heap).
+
+====================================================
+STEP 4 : MAIN THREAD STARTS
+====================================================
+
+JVM creates the Main Thread.
+
+Main Thread gets:
+
+- Stack
+- Program Counter
+
+A Stack Frame is pushed for main().
+
+Stack
+
+----------------------
+
+main()
+
+args
+
+s1 = null
+
+----------------------
+
+Program Counter points to the first instruction inside main().
+
+====================================================
+STEP 5 : EXECUTE
+
+Student s1 = new Student("Aditya", 28);
+====================================================
+
+The JVM sees the keyword "new".
+
+It performs the following:
+
+1. Allocates memory in Heap.
+
+Heap
+
+Student Object
+
+name = null
+age = 0
+
+2. Calls the constructor.
+
+Student("Aditya",28)
+
+Constructor Stack Frame is pushed.
+
+Stack
+
+Student()
+
+main()
+
+====================================================
+STEP 6 : CONSTRUCTOR EXECUTES
+====================================================
+
+this.name = name;
+
+Copies the constructor parameter
+into the object's field.
+
+this.age = age;
+
+Now Heap becomes
+
+Student Object
+
+name -----> "Aditya"
+age = 28
+
+The String "Aditya" comes from the String Pool
+(or is created there if not already present).
+
+====================================================
+STEP 7 : CONSTRUCTOR RETURNS
+====================================================
+
+Constructor finishes.
+
+Its Stack Frame is popped.
+
+Stack
+
+main()
+
+s1 -----> Student Object
+
+Control returns to main().
+
+====================================================
+STEP 8 : CALL
+
+s1.markAttendance()
+====================================================
+
+Since this is an instance method,
+
+JVM first finds
+
+s1 ---> Student Object
+
+Then creates another Stack Frame.
+
+Stack
+
+markAttendance()
+
+main()
+
+Inside markAttendance(),
+
+the hidden variable
+
+this
+
+points to the Student object.
+
+System.out.println(name);
+
+actually becomes
+
+System.out.println(this.name);
+
+Output
+
+Aditya is present
+
+Method finishes.
+
+Stack becomes
+
+main()
+
+====================================================
+STEP 9 : CALL STATIC METHOD
+
+Student.changeCollege("IIT Bombay");
+====================================================
+
+Since this is STATIC,
+
+no object is required.
+
+JVM directly looks inside the Method Area.
+
+Method Area
+
+Student
+
+changeCollege()
+
+A new Stack Frame is created.
+
+Stack
+
+changeCollege()
+
+main()
+
+Execution
+
+college = "IIT Bombay";
+
+The static variable is updated.
+
+Method Area
+
+Student
+
+college -----> "IIT Bombay"
+
+The old String "IIT G" becomes unreachable
+(if nothing references it).
+
+====================================================
+STEP 10 : MAIN FINISHES
+====================================================
+
+main() reaches the end.
+
+The main Stack Frame is removed.
+
+Stack
+
+(empty)
+
+The reference s1 disappears.
+
+Now no live reference points to the Student object.
+
+The object becomes eligible for Garbage Collection.
+
+====================================================
+IMPORTANT INTERVIEW POINTS
+====================================================
+
+1. "new" does TWO things:
+
+- Allocates memory in Heap.
+- Invokes the constructor.
+
+----------------------------------------------------
+
+2. Constructor is just another method.
+
+It gets its own Stack Frame.
+
+----------------------------------------------------
+
+3. Instance methods require an object.
+
+JVM uses the object reference to execute them.
+
+----------------------------------------------------
+
+4. Static methods belong to the class.
+
+They do not require any object.
+
+They are resolved using class metadata stored in the Method Area.
+
+----------------------------------------------------
+
+5. Every method call creates a new Stack Frame.
+
+Example
+
+main()
+
+↓
+
+Student()
+
+↓
+
+markAttendance()
+
+↓
+
+println()
+
+Each method gets its own frame.
+
+----------------------------------------------------
+
+6. Every thread has:
+
+- One Stack
+- One Program Counter
+
+Each method call pushes a new Stack Frame.
+
+----------------------------------------------------
+
+7. Heap stores actual objects.
+
+Stack stores only references to those objects.
+
+----------------------------------------------------
+
+8. Method Area stores:
+
+- Class metadata
+- Method definitions
+- Constructor definitions
+- Static variables
+- Runtime Constant Pool
+
+====================================================
+ONE-LINE FLOW FOR INTERVIEW
+====================================================
+
+java Main
+      ↓
+JVM Starts
+      ↓
+Class Loader loads Main & Student
+      ↓
+Method Area stores class metadata
+      ↓
+Static variables initialized
+      ↓
+Main Thread created
+      ↓
+main() Stack Frame pushed
+      ↓
+new Student()
+      ↓
+Object allocated in Heap
+      ↓
+Constructor executes
+      ↓
+Reference stored in Stack
+      ↓
+Instance method executes
+      ↓
+Static method executes
+      ↓
+main() finishes
+      ↓
+Stack cleared
+      ↓
+Object becomes eligible for Garbage Collection

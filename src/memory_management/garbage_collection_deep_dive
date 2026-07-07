@@ -1,0 +1,9 @@
+
+
+Heap -> two segment
+1. young generation
+2. old generation
+
+
+young gen -> further divided into three parts
+Eden , s0 and s1
